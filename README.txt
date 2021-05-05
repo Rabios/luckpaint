@@ -85,7 +85,8 @@ LUCKPAINT - CHANGELOG
 =================================
 Version v0.3 (5/May/2021)
 =================================
-Now game generated random palettes when resetting game data!
+1. Now game generated random palettes when resetting game data!
+2. Now if player finishes the game and when gets back to main menu then continue, Game will send him to last level!
 
 =================================
 Version v0.2 (5/May/2021)
