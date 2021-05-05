@@ -1289,6 +1289,20 @@ def finished_level args
           args.state.paint_finish_timer = 0
           $gtk.serialize_state("game_state.txt", args.state)
         end
+      else
+        if args.state.sound_enabled == 1
+          args.audio[:win] ||= {
+            input: "audio/434612__jens-enk__completed.ogg",
+            x: 0.0,
+            y: 0.0,
+            z: 0.0,
+            gain: args.state.volume / 100,
+            pitch: 1.0,
+            paused: false,
+            looping: false,
+          }
+        end
+        args.state.current_scene = 5
       end
     end
   end
