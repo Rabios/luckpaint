@@ -123,10 +123,37 @@ def tick args
     end
   end
   
-  # TAB or R key: Restart game
-  #if args.inputs.keyboard.tab || args.inputs.keyboard.r
-  #  $gtk.reset seed: (Time.now.to_f * 100).to_i
-  #end
+  # R key: Restart game
+  if args.inputs.keyboard.tab || args.inputs.keyboard.r
+    $gtk.reset seed: (Time.now.to_f * 100).to_i
+  end
+  
+  # S key: Screenshot
+  if args.inputs.keyboard.key_down.s
+    take_screenshot args
+  end
+end
+
+def take_screenshot args
+  if !File.exist?("screenshots/")
+    $gtk.system "mkdir screenshots/"
+  end
+  
+  if File.file?("screenshots/screenshot#{args.state.screenshot_index}.png")
+    args.state.screenshot_index += 1
+  end
+  
+  args.outputs.screenshots << {
+    x: 0,
+    y: 0,
+    w: 1280,
+    h: 720,
+    path: "screenshots/screenshot#{args.state.screenshot_index}.png",
+    r: 255,
+    g: 255,
+    b: 255,
+    a: 255
+  }
 end
 
 def setup args
@@ -152,6 +179,7 @@ def setup args
   args.state.selection              ||= -1
   args.state.prev_selection         ||= -1
   args.state.painting_alpha         ||= 255
+  args.state.screenshot_index       ||= 0
   
   args.state.menu_texts ||= [
     {
