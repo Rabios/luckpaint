@@ -1,7 +1,22 @@
 # Written by Rabia Alhaffar in 4/May/2021
 # Updated: 5/May/2021
 # luckpaint, Hybrid paint game made for Juicy Jam #1
-# Thanks also goes to @leviondiscord and @Vote Pedro and @Akzidenz-Grotesk at DragonRuby Discord Server for helping me!
+=begin
+Special Thanks:
+Justin Cyr on Twitter and computermaus256 on Reddit for their art, Some of levels designed are based on it!
+
+===========================
+Juicy Jam Discord Server
+===========================
+@Juice_Baby (Who gave me the idea to make game looks like what is it now!)
+
+===========================
+DRGTK Discord Server
+===========================
+@leviondiscord
+@Vote Pedro
+@Akzidenz-Grotesk
+=end
 
 require "app/levels.rb"     # Load game levels
 
@@ -48,6 +63,7 @@ def tick args
   setup args
   load_levels args
   
+  # Load game save, If not then start new game
   if !args.state.game_loaded
     parsed_state = $gtk.deserialize_state("game_state.txt")
   
@@ -64,14 +80,17 @@ def tick args
     args.state.game_loaded = true
   end
   
+  # Load game fullscreen option
   if args.state.fullscreen == 1
     $gtk.set_window_fullscreen true
   else
     $gtk.set_window_fullscreen false
   end
   
+  # Hide cursor
   $gtk.hide_cursor
   
+  # Game scenes
   if args.state.current_scene == 0
     main_menu args
   elsif args.state.current_scene == 1    
@@ -86,6 +105,7 @@ def tick args
     credits_menu args
   end
   
+  # Draw DRGTK icon with link onclick in some places
   if args.state.current_scene != 1 && args.state.current_scene != 2 && args.state.current_scene != 3
     args.outputs.primitives << {
       x: 1280 - 84,
@@ -102,6 +122,7 @@ def tick args
     end
   end
   
+  # Draw the cursor
   args.outputs.primitives << {
     x: args.inputs.mouse.x - 60,
     y: args.inputs.mouse.y - 14,
@@ -134,6 +155,7 @@ def tick args
   end
 end
 
+# Function designed to take screenshots!
 def take_screenshot args
   if !File.exist?("screenshots/")
     $gtk.system "mkdir screenshots/"
@@ -156,6 +178,7 @@ def take_screenshot args
   }
 end
 
+# Initialize game variables
 def setup args
   args.state.game_loaded            ||= false
   args.state.loaded_saved_game      ||= false
@@ -182,9 +205,10 @@ def setup args
   args.state.screenshot_index       ||= 0
   args.state.pops                   ||= 0
   
+  # Menu texts
   args.state.menu_texts ||= [
     {
-      text: "START NEW GAME",
+      text: "START NEW GAME", # This changes to CONTINUE once game save is loaded
       x: 32,
       y: 460.from_top,
       trail_w: 0
@@ -209,6 +233,7 @@ def setup args
     },
   ]
   
+  # Grid that player paints on!
   args.state.current_grid ||= [
     [ 0, 0, 0, 0, 0, 0, 0, 0 ],
     [ 0, 0, 0, 0, 0, 0, 0, 0 ],
@@ -220,6 +245,7 @@ def setup args
     [ 0, 0, 0, 0, 0, 0, 0, 0 ],
   ]
   
+  # Key bindings, Used to change selected color
   args.state.keys = [
     args.inputs.keyboard.key_down.zero,
     args.inputs.keyboard.key_down.one,
@@ -234,13 +260,16 @@ def setup args
   ]
 end
 
+# Main menu scene
 def main_menu args
+  # If game loaded, Change first option text to CONTINUE
   if args.state.loaded_saved_game && (args.state.current_level >= 0 && args.state.played_game_previously == 1)
     args.state.menu_texts[0].text = "CONTINUE"
   else
     args.state.menu_texts[0].text = "START NEW GAME"
   end
   
+  # Draw background and logo
   args.outputs.primitives << {
     x: 0,
     y: 760.from_top,
@@ -273,6 +302,7 @@ def main_menu args
     a: 255
   }.label
   
+  # Draw menu options texts and check for click on it!
   args.state.menu_texts.length.times.map do |i|
     args.outputs.primitives << {
       x: args.state.menu_texts[i].x,
@@ -286,6 +316,7 @@ def main_menu args
       a: 255
     }.label
     
+    # If mouse hovered on option, Reset trail width and move it below text
     if AABB(args.inputs.mouse.x - 14, (args.inputs.mouse.y + 320), 1, 1, args.state.menu_texts[i].x, args.state.menu_texts[i].y, 200, 320)
       args.state.prev_selection = args.state.selection
       args.state.selection = i
@@ -306,6 +337,7 @@ def main_menu args
         end
       end
       
+      # If clicked on option, Change scene
       if args.inputs.mouse.click && args.inputs.mouse.button_left
         if args.state.selection == 0
           play_click_sound args
@@ -328,6 +360,7 @@ def main_menu args
     end
   end
   
+  # Draw the trail below texts
   args.outputs.primitives << {
     x: args.state.trail_x,
     y: args.state.trail_y,
@@ -340,7 +373,9 @@ def main_menu args
   }.solid
 end
 
+# Game Options scene
 def options_menu args
+  # AABB for all buttons
   aabb_first_button = AABB(args.inputs.mouse.x - 20, args.inputs.mouse.y.from_top, 1, 1, 480, 460.from_top, 100, 40)
   aabb_second_button = AABB(args.inputs.mouse.x - 20, args.inputs.mouse.y.from_top, 1, 1, 770, 460.from_top, 100, 40)
   aabb_third_button = AABB(args.inputs.mouse.x - 20, args.inputs.mouse.y.from_top, 1, 1, 511, 365.from_top, 60, 60)
@@ -349,6 +384,7 @@ def options_menu args
   aabb_sixth_button = AABB(args.inputs.mouse.x - 20, args.inputs.mouse.y.from_top, 1, 1, 528, 213.from_top, 100, 40)
   aabb_seventh_button = AABB(args.inputs.mouse.x - 20, args.inputs.mouse.y.from_top, 1, 1, 324, 143.from_top, 580, 40)
   
+  # Draw background and menu label
   args.outputs.primitives << {
     x: 0,
     y: 760.from_top,
@@ -650,6 +686,7 @@ def options_menu args
     a: 255,
   }.border
   
+  # Draw back button
   args.outputs.primitives << {
     x: 16,
     y: 660.from_top,
@@ -664,6 +701,8 @@ def options_menu args
   
   #$gtk.log "X: #{args.inputs.mouse.x}, Y: #{args.inputs.mouse.y}"
   
+  # If clicked on button, Do his work.
+  # NOTE: Game options automatically saved once level finished or player gets out of options menu! :)
   if args.inputs.mouse.click && args.inputs.mouse.button_left
     if AABB(args.inputs.mouse.x - 20, (args.inputs.mouse.y + 595).from_top, 1, 1, 16, 660.from_top, 32, 100)
       play_click_sound args
@@ -703,6 +742,7 @@ def options_menu args
     end
   end
   
+  # Draw note that game data cleared on screen!
   if args.state.data_cleared == 1
     if args.state.clear_data_timer + 1 < 120
       args.state.clear_data_timer += 1
@@ -733,9 +773,11 @@ def options_menu args
   end
 end
 
+# Credits scene
 def credits_menu args
   args.state.hover_on_link = AABB(args.inputs.mouse.x - 20, (args.inputs.mouse.y + 40).from_top, 1, 1, 376, 382.from_top, 500, 48)
   
+  # Draw background and logo
   args.outputs.primitives << {
     x: 0,
     y: 760.from_top,
@@ -768,6 +810,7 @@ def credits_menu args
     a: 255
   }.label
   
+  # Draw texts
   args.outputs.primitives << {
     x: 336,
     y: 282.from_top,
@@ -815,6 +858,7 @@ def credits_menu args
     a: 255
   }.label
   
+  # Draw back button
   args.outputs.primitives << {
     x: 16,
     y: 660.from_top,
@@ -827,6 +871,8 @@ def credits_menu args
     a: 255
   }.label
   
+  # If clicked on link, Go for it!
+  # Else if back button clicked, Get back to main menu.
   if args.inputs.mouse.click && args.inputs.mouse.button_left
     if AABB(args.inputs.mouse.x - 20, (args.inputs.mouse.y + 595).from_top, 1, 1, 16, 660.from_top, 32, 100)
       play_click_sound args
@@ -838,10 +884,13 @@ def credits_menu args
   end
 end
 
+# Select mode menu, Only appear if starting new game.
+# NOTE: I can assume that player may select some sort of mode by mistake, For that in options i allowed ya to change mode.
 def select_mode_menu args
   aabb_first_mode = AABB(args.inputs.mouse.x - 20, args.inputs.mouse.y.from_top, 1, 1, 320, 522.from_top, 610, 160)
   aabb_second_mode = AABB(args.inputs.mouse.x - 20, args.inputs.mouse.y.from_top, 1, 1, 320, 280.from_top, 610, 160)
-
+  
+  # Draw background and menu label
   args.outputs.primitives << {
     x: 0,
     y: 760.from_top,
@@ -950,6 +999,8 @@ def select_mode_menu args
   # x: 384, y: 522
   # x: 350, y: 280
   
+  # If selected mode go to gameplay!
+  # And let the fun begin! :)
   if args.inputs.mouse.click && args.inputs.mouse.button_left
     if AABB(args.inputs.mouse.x - 20, (args.inputs.mouse.y + 595).from_top, 1, 1, 16, 660.from_top, 32, 100)
       play_click_sound args
@@ -966,11 +1017,14 @@ def select_mode_menu args
   end
 end
 
+# Pause menu scene!
 def pause_menu args
+  # AABB for menu options
   aabb_first_text = AABB(args.inputs.mouse.x, args.inputs.mouse.y.from_top, 1, 1, 520, 330, 200, 100)
   aabb_second_text = AABB(args.inputs.mouse.x, args.inputs.mouse.y.from_top, 1, 1, 500, 440, 200, 100)
   aabb_third_text = AABB(args.inputs.mouse.x, args.inputs.mouse.y.from_top, 1, 1, 586, 550, 200, 100)
-
+  
+  # Draw background and menu label
   args.outputs.primitives << {
     x: 0,
     y: 760.from_top,
@@ -991,6 +1045,7 @@ def pause_menu args
     a: 255,
   }.label
   
+  # Draw options
   args.outputs.primitives << {
     x: 520,
     y: 330.from_top,
@@ -1027,6 +1082,7 @@ def pause_menu args
     a: 255,
   }.label
   
+  # If selected an option, Go for it!
   if args.inputs.mouse.click && args.inputs.mouse.button_left
     if aabb_first_text
       play_click_sound args
@@ -1041,6 +1097,7 @@ def pause_menu args
   end
 end
 
+# Here the fun starts! :)
 def play_game args
   args.state.played_game_previously = 1
   render_game args
@@ -1048,9 +1105,11 @@ def play_game args
   finished_level args
 end
 
+# Function that renders game graphics!
 def render_game args
   aabb_pause_button = AABB(args.inputs.mouse.x, args.inputs.mouse.y, 1, 1, 1220, 64.from_top, 32, 64)
   
+  # Draw background and level label
   args.outputs.primitives << {
     x: 0,
     y: 760.from_top,
@@ -1090,6 +1149,8 @@ def render_game args
   end
 =end
 
+  # If pixel is empty, Draw rectangle in white with corresponding color
+  # Else, Draw pixel with it's color!
   args.state.current_grid.length.times.map do |i|
     args.state.current_grid[i].length.times.map do |j|
       if args.state.current_grid[i][j] == 0
@@ -1132,6 +1193,7 @@ def render_game args
     end
   end
   
+  # Draw palette
   args.state.levels[args.state.current_level][:palette].length.times.map do |i|
     args.outputs.primitives << {
       x: -64 + (i * 64),
@@ -1157,6 +1219,7 @@ def render_game args
     }.label
   end
   
+  # If selected color, Draw black outlined rect over it so player can know what he use.
   if args.state.selected_color > 0
     args.outputs.primitives << {
       x: -64 + args.state.selected_color * 64,
@@ -1170,6 +1233,7 @@ def render_game args
     }.border
   end
   
+  # Pause button
   args.outputs.primitives << {
     x: 1220,
     y: 20.from_top,
@@ -1183,9 +1247,15 @@ def render_game args
   }.label
 end
 
+# Function that handles the game input!
 def game_input args
+  # DEV NOTE: All button clicks plays sound!
+  
+  # AABB for pause button
   aabb_pause_button = AABB(args.inputs.mouse.x, args.inputs.mouse.y, 1, 1, 1220, 64.from_top, 32, 64)
   
+  # If number key pressed, Change selected color to key number!
+  # Trick: To not use color, Hit key 0
   args.state.keys.length.times.map do |i|
     if args.state.keys[i]
       if i < args.state.levels[args.state.current_level][:palette].length
@@ -1195,6 +1265,7 @@ def game_input args
     end
   end
   
+  # If clicked on one of palette colors, Select color
   if args.inputs.mouse.button_left & args.inputs.mouse.click
     args.state.levels[args.state.current_level][:palette].length.times.map do |i|
       if AABB(args.inputs.mouse.x, args.inputs.mouse.y.from_top, 1, 1, (-64 + i * 64), 64.from_top, 64, 64)
@@ -1204,6 +1275,7 @@ def game_input args
     end
   end
   
+  # If clicked on pause button go for it!
   if args.inputs.mouse.click && args.inputs.mouse.button_left
     if aabb_pause_button
       play_click_sound args
@@ -1211,6 +1283,7 @@ def game_input args
     end
   end
   
+  # If clicked on pixel that is not painted, Paint with popping sound!
   if args.inputs.mouse.button_left
     args.state.current_grid.length.times.map do |i|
       args.state.current_grid[i].length.times.map do |j|
@@ -1231,7 +1304,7 @@ def game_input args
               }
             end
           end
-              
+          
           if args.state.levels[args.state.current_level][:content][i][j] == args.state.selected_color
             if args.state.current_grid[i][j] != args.state.levels[args.state.current_level][:content][i][j]
               args.state.current_grid[i][j] = args.state.selected_color
@@ -1251,16 +1324,21 @@ def game_input args
   end
 end
 
-# If level finished, Save game automatically and then clear current_grid result to move on next level
+# Function that handles the completion for game and it's levels.
 def finished_level args
   matches = 0
   
+  # Check match of grid with level content grid
   args.state.current_grid.length.times.map do |i|
     if arr_match(args.state.current_grid[i], args.state.levels[args.state.current_level][:content][i])
       matches += 1
     end
   end
   
+  # If true then, There are one of these cases:
+  # 1. No levels: The game goes to credits menu scene!
+  # 2. If there are level: Save game and go to next level, With resetting default values!
+  # With that, Play the win sound and fade the drawing!
   if matches == args.state.current_grid.length
     if !args.state.levels[args.state.current_level][:finished]
       if args.state.current_level + 1 < args.state.levels.length

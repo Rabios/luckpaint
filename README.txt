@@ -1,11 +1,6 @@
 ================================================================
 LUCKPAINT - GAME FOR JUICY JAM #1
 ================================================================
-Links:
-
-1. https://rabios.itch.io/luckpaint
-2. https://github.com/Rabios/luckpaint
-
 Hi there! :)
 
 luckpaint is 8x8 pixel art painting game i tried to make in 48 hours just for Juicy Jam #1 under the theme "Luck".
@@ -39,11 +34,26 @@ A: Easy, Go to https://github.com/Rabios/luckpaint/issues and create new issue d
 LUCKPAINT - GAME CONTROLS
 ================================================================
 
-1. Paint with mouse click on pixels
-2. For changing selected color from palette: Click with mouse on color rectangle or hit key with same number on the color rectangle (Hit 1 to Select color 1)
-3. S to Take screenshot
-4. R to Restart game (Can be needy in some cases)
-5. Escape to exit/pause game
+1. Paint with mouse click on pixels.
+2. For changing selected color from palette: Click with mouse on color rectangle or hit key with same number on the color rectangle (Hit 1 to Select color 1).
+3. S to Take screenshot.
+4. R to Restart game. (Can be needy in some cases)
+5. Escape to exit/pause game.
+
+================================================================
+LUCKPAINT - SPECIAL THANKS
+================================================================
+Justin Cyr on Twitter and computermaus256 on Reddit for their art, Some of levels designed are based on it!
+
+Juicy Jam Discord Server:
+
+1. @Juice_Baby (Who gave me the idea to make game looks like what is it now!)
+
+2. DRGTK Discord Server:
+
+@leviondiscord
+@Vote Pedro
+@Akzidenz-Grotesk
 
 ================================================================
 LUCKPAINT - THIRD PARTY
@@ -51,6 +61,7 @@ LUCKPAINT - THIRD PARTY
 Images used for the game:
 
 1. Background used for the game, Which is gradient from xmple.com: https://www.xmple.com/wallpaper/gradient-purple-blue-linear--c2-00008b-8b008b-a-90-f-14-image
+
 Sounds used for the game (freesound.org):
 
 1. https://freesound.org/people/greenvwbeetle/sounds/244657
