@@ -51,6 +51,7 @@ LUCKPAINT - THIRD PARTY
 Images used for the game:
 
 1. Background used for the game, Which is gradient from xmple.com: https://www.xmple.com/wallpaper/gradient-purple-blue-linear--c2-00008b-8b008b-a-90-f-14-image
+
 Sounds used for the game (freesound.org):
 
 1. https://freesound.org/people/greenvwbeetle/sounds/244657
