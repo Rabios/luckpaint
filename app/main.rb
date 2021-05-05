@@ -1094,10 +1094,10 @@ def render_game args
       if args.state.current_grid[i][j] == 0
         if args.state.levels[args.state.current_level][:content][i][j] > 0
           args.outputs.primitives << {
-            x: 416 + (j * args.state.grid_size) + 96,
-            y: (264 + (i * args.state.grid_size)).from_top,
-            w: args.state.grid_size,
-            h: args.state.grid_size,
+            x: 416 + (j * 32) + 96,
+            y: (264 + (i * 32)).from_top,
+            w: 32,
+            h: 32,
             r: 255,
             g: 255,
             b: 255,
@@ -1105,8 +1105,8 @@ def render_game args
           }.border
       
           args.outputs.primitives << {
-            x: 416 + (j * args.state.grid_size) + 96 + 4,
-            y: (264 + (i * args.state.grid_size) - args.state.grid_size).from_top,
+            x: 416 + (j * 32) + 96 + 4,
+            y: (264 + (i * 32) - 32).from_top,
             text: args.state.levels[args.state.current_level][:content][i][j],
             size_enum: 8,
             font: "fonts/ubuntu-title.ttf",
@@ -1118,10 +1118,10 @@ def render_game args
         end
       else
         args.outputs.primitives << {
-          x: 416 + (j * args.state.grid_size) + 96,
-          y: (264 + (i * args.state.grid_size)).from_top,
-          w: args.state.grid_size,
-          h: args.state.grid_size,
+          x: 416 + (j * 32) + 96,
+          y: (264 + (i * 32)).from_top,
+          w: 32,
+          h: 32,
           r: args.state.levels[args.state.current_level][:palette][args.state.current_grid[i][j]].r,
           g: args.state.levels[args.state.current_level][:palette][args.state.current_grid[i][j]].g,
           b: args.state.levels[args.state.current_level][:palette][args.state.current_grid[i][j]].b,
