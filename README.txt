@@ -77,3 +77,22 @@ Fonts used for the game:
 
 1. Ubuntu Titling font by Andrew Fitzsimon: https://www.fontsquirrel.com/fonts/ubuntu-title
 (Licensed under GNU Lesser General Public License)
+
+================================================================
+LUCKPAINT - CHANGELOG
+================================================================
+
+=================================
+Version v0.3 (5/May/2021)
+=================================
+Now game generated random palettes when resetting game data!
+
+=================================
+Version v0.2 (5/May/2021)
+=================================
+Fixed audio crashes and improved it!
+
+=================================
+Version v0.1 (5/May/2021)
+=================================
+First release of the game!
