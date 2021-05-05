@@ -180,6 +180,7 @@ def setup args
   args.state.prev_selection         ||= -1
   args.state.painting_alpha         ||= 255
   args.state.screenshot_index       ||= 0
+  args.state.pops                   ||= 0
   
   args.state.menu_texts ||= [
     {
@@ -1214,11 +1215,10 @@ def game_input args
     args.state.current_grid.length.times.map do |i|
       args.state.current_grid[i].length.times.map do |j|
         if AABB(args.inputs.mouse.x, args.inputs.mouse.y, 1, 1, 416 + (j * 32) + 96, (264 + (i * 32)).from_top, 32, 32)
-          if args.state.levels[args.state.current_level][:content][i][j] == args.state.selected_color
-            args.state.paiting = true
-            args.state.current_grid[i][j] = args.state.selected_color
-            
-            if args.state.sound_enabled == 1
+          
+          if args.state.sound_enabled == 1
+            if args.state.pops == 0
+              args.state.pops = 1
               args.audio[:pop] ||= {
                 input: "audio/244657__greenvwbeetle__pop-5.wav",
                 x: 0.0,
@@ -1230,9 +1230,18 @@ def game_input args
                 looping: false,
               }
             end
-            #play_click_sound args
+          end
+              
+          if args.state.levels[args.state.current_level][:content][i][j] == args.state.selected_color
+            if args.state.current_grid[i][j] != args.state.levels[args.state.current_level][:content][i][j]
+              args.state.current_grid[i][j] = args.state.selected_color
+              args.state.painting = true
+              args.state.pops = 0
+            else
+              args.state.painting = false
+            end
           else
-            args.state.paiting = false
+            args.state.painting = false
           end
         else
           args.state.painting = false
