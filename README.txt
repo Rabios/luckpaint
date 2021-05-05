@@ -1,6 +1,11 @@
 ================================================================
 LUCKPAINT - GAME FOR JUICY JAM #1
 ================================================================
+Links:
+
+1. https://rabios.itch.io/luckpaint
+2. https://github.com/Rabios/luckpaint
+
 Hi there! :)
 
 luckpaint is 8x8 pixel art painting game i tried to make in 48 hours just for Juicy Jam #1 under the theme "Luck".
