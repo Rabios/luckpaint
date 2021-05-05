@@ -87,6 +87,8 @@ def tick args
     $gtk.set_window_fullscreen false
   end
   
+  
+  
   # Hide cursor
   $gtk.hide_cursor
   
@@ -734,6 +736,26 @@ def options_menu args
       args.state.fullscreen = args.state.fullscreen == 1 ? 0 : 1
     elsif aabb_seventh_button
       play_click_sound args
+      args.state.current_grid = [
+        [ 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 0 ],
+        [ 0, 0, 0, 0, 0, 0, 0, 0 ],
+      ]
+      args.state.first_color = rand_rgb()
+      args.state.second_color = rand_rgb()
+      args.state.third_color = rand_rgb()
+      args.state.fourth_color = rand_rgb()
+      args.state.fifth_color = rand_rgb()
+      args.state.sixth_color = rand_rgb()
+      args.state.seventh_color = rand_rgb()
+      args.state.eighth_color = rand_rgb()
+      args.state.ninth_color = rand_rgb()
+      args.state.tenth_color = rand_rgb()
       args.state.luck_mode = 0
       args.state.current_level = 0
       args.state.played_game_previously = 0
@@ -1390,6 +1412,17 @@ def finished_level args
           }
         end
         args.state.current_scene = 5
+        args.state.levels[args.state.current_level][:finished] = false
+        args.state.current_grid = [
+          [ 0, 0, 0, 0, 0, 0, 0, 0 ],
+          [ 0, 0, 0, 0, 0, 0, 0, 0 ],
+          [ 0, 0, 0, 0, 0, 0, 0, 0 ],
+          [ 0, 0, 0, 0, 0, 0, 0, 0 ],
+          [ 0, 0, 0, 0, 0, 0, 0, 0 ],
+          [ 0, 0, 0, 0, 0, 0, 0, 0 ],
+          [ 0, 0, 0, 0, 0, 0, 0, 0 ],
+          [ 0, 0, 0, 0, 0, 0, 0, 0 ],
+        ]
       end
     end
   end
