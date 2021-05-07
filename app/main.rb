@@ -144,7 +144,7 @@ def tick args
     end
   end
   
-  # R key: Restart game
+  # TAB or R key: Restart game
   if args.inputs.keyboard.tab || args.inputs.keyboard.r
     $gtk.reset seed: (Time.now.to_f * 100).to_i
   end
