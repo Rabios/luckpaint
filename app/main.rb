@@ -87,8 +87,6 @@ def tick args
     $gtk.set_window_fullscreen false
   end
   
-  
-  
   # Hide cursor
   $gtk.hide_cursor
   
