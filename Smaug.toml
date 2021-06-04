@@ -14,5 +14,4 @@ edition = "pro"
 
 [itch]
 url = "https://rabios.itch.io/luckpaint"
-# Your username on Itch.io.
 username = "rabios"
