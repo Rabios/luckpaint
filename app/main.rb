@@ -1,5 +1,5 @@
 # Written by Rabia Alhaffar in 4/May/2021
-# Updated: 3/June/2021
+# Updated: 4/June/2021
 # luckpaint, Hybrid paint game made for Juicy Jam #1
 =begin
 Special Thanks:
@@ -289,13 +289,7 @@ end
 # Main menu scene
 def main_menu args
   # If game loaded, Change first option text to CONTINUE
-  if args.state.loaded_saved_game && (args.state.current_level >= 0 && args.state.played_game_previously == 1)
-    args.state.menu_texts[0].text = "CONTINUE"
-  else
-    args.state.menu_texts[0].text = "START NEW GAME"
-  end
-  
-  if (args.state.current_level >= 0 && args.state.played_game_previously == 1)
+  if args.state.loaded_saved_game || (args.state.current_level >= 0 && args.state.played_game_previously == 1)
     args.state.menu_texts[0].text = "CONTINUE"
   else
     args.state.menu_texts[0].text = "START NEW GAME"
