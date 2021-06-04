@@ -18,8 +18,6 @@ DRGTK Discord Server
 @Akzidenz-Grotesk
 =end
 
-# TODO: Provide touch input for scenes other than main menu ;)
-
 require "app/levels.rb"     # Load game levels
 
 # Detects collision between 2 rectangles...
@@ -292,6 +290,12 @@ end
 def main_menu args
   # If game loaded, Change first option text to CONTINUE
   if args.state.loaded_saved_game && (args.state.current_level >= 0 && args.state.played_game_previously == 1)
+    args.state.menu_texts[0].text = "CONTINUE"
+  else
+    args.state.menu_texts[0].text = "START NEW GAME"
+  end
+  
+  if (args.state.current_level >= 0 && args.state.played_game_previously == 1)
     args.state.menu_texts[0].text = "CONTINUE"
   else
     args.state.menu_texts[0].text = "START NEW GAME"
@@ -1462,6 +1466,7 @@ def finished_level args
           args.state.selected_color = 0
           args.state.painting_alpha = 255
           args.state.paint_finish_timer = 0
+          args.state.played_game_previously = 1
           $gtk.serialize_state("game_state.txt", args.state)
         end
       else
@@ -1477,6 +1482,7 @@ def finished_level args
             looping: false,
           }
         end
+        args.state.played_game_previously = 1
         args.state.current_scene = 5
         args.state.levels[args.state.current_level][:finished] = false
         args.state.current_grid = [
