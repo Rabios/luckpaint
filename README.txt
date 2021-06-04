@@ -85,7 +85,6 @@ LUCKPAINT - CHANGELOG
 =================================
 Version v0.4 (4/June/2021)
 =================================
-
 Support for mobile platforms, Including Android and iOS!
 
 =================================
