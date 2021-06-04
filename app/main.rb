@@ -1,5 +1,5 @@
 # Written by Rabia Alhaffar in 4/May/2021
-# Updated: 5/May/2021
+# Updated: 3/June/2021
 # luckpaint, Hybrid paint game made for Juicy Jam #1
 =begin
 Special Thanks:
@@ -18,11 +18,25 @@ DRGTK Discord Server
 @Akzidenz-Grotesk
 =end
 
+# TODO: Provide touch input for scenes other than main menu ;)
+
 require "app/levels.rb"     # Load game levels
 
 # Detects collision between 2 rectangles...
 def AABB(x1, y1, w1, h1, x2, y2, w2, h2)
   return x1 < x2 + w2 && x1 + w1 > x2 && y1 < y2 + h2 && y1 + h1 > y2
+end
+
+def is_mobile
+  return ($gtk.platform == "iOS" || $gtk.platform == "Android")
+end
+
+def touch_down(args)
+  return (args.state.touched == 1)
+end
+
+def touch_press(args)
+  return (args.state.touched == 1 && (args.state.touched != args.state.touched_previously))
 end
 
 # Detects if array matches with another in length and elements
@@ -90,6 +104,10 @@ def tick args
   # Hide cursor
   $gtk.hide_cursor
   
+  # Update touch input (Mobile)
+  args.state.touched_previously = args.state.touched
+  args.state.touched = !args.inputs.finger_one.nil? ? 1 : 0
+  
   # Game scenes
   if args.state.current_scene == 0
     main_menu args
@@ -115,9 +133,17 @@ def tick args
       path: "sprites/icon.png"
     }.sprite
     
-    if args.inputs.mouse.click && args.inputs.mouse.button_left
-      if AABB(args.inputs.mouse.x, args.inputs.mouse.y, 1, 1, 1280 - 84, 700.from_top, 64, 64)
-        $gtk.openurl "https://dragonruby.org"
+    if (args.inputs.mouse.click && args.inputs.mouse.button_left) || touch_press(args)
+      if !is_mobile
+        link_aabb = AABB(args.inputs.mouse.x, args.inputs.mouse.y, 1, 1, 1280 - 84, 700.from_top, 64, 64)
+      else
+        if !args.inputs.finger_one.nil?
+          link_aabb = AABB(args.inputs.finger_one.x, args.inputs.finger_one.y, 1, 1, 1280 - 84, 700.from_top, 64, 64)
+        end
+      end
+      
+      if link_aabb
+        $gtk.openurl "https://dragonruby.org/toolkit/game"
       end
     end
   end
@@ -144,7 +170,7 @@ def tick args
     end
   end
   
-  # TAB or R key: Restart game
+  # R key: Restart game
   if args.inputs.keyboard.tab || args.inputs.keyboard.r
     $gtk.reset seed: (Time.now.to_f * 100).to_i
   end
@@ -188,7 +214,7 @@ def setup args
   args.state.sound_enabled          ||= 1
   args.state.music_enabled          ||= 1
   args.state.volume                 ||= 100
-  args.state.fullscreen             ||= 0
+  args.state.fullscreen             ||= is_mobile ? 1 : 0
   args.state.trail_x                ||= 0
   args.state.trail_y                ||= 0
   args.state.trail_w                ||= 0
@@ -203,6 +229,8 @@ def setup args
   args.state.prev_selection         ||= -1
   args.state.painting_alpha         ||= 255
   args.state.screenshot_index       ||= 0
+  args.state.touched                ||= 0
+  args.state.touched_previously     ||= 0
   args.state.pops                   ||= 0
   
   # Menu texts
@@ -316,8 +344,16 @@ def main_menu args
       a: 255
     }.label
     
+    if !is_mobile
+      option_rec = AABB(args.inputs.mouse.x - 14, (args.inputs.mouse.y + 320), 1, 1, args.state.menu_texts[i].x, args.state.menu_texts[i].y, 200, 320)
+    else
+      if !args.inputs.finger_one.nil?
+        option_rec = AABB(args.inputs.finger_one.x - 14, (args.inputs.finger_one.y + 320), 1, 1, args.state.menu_texts[i].x, args.state.menu_texts[i].y, 200, 320)
+      end
+    end
+    
     # If mouse hovered on option, Reset trail width and move it below text
-    if AABB(args.inputs.mouse.x - 14, (args.inputs.mouse.y + 320), 1, 1, args.state.menu_texts[i].x, args.state.menu_texts[i].y, 200, 320)
+    if option_rec
       args.state.prev_selection = args.state.selection
       args.state.selection = i
       
@@ -338,7 +374,7 @@ def main_menu args
       end
       
       # If clicked on option, Change scene
-      if args.inputs.mouse.click && args.inputs.mouse.button_left
+      if (args.inputs.mouse.click && args.inputs.mouse.button_left) || touch_press(args)
         if args.state.selection == 0
           play_click_sound args
           if args.state.played_game_previously == 0
@@ -376,13 +412,27 @@ end
 # Game Options scene
 def options_menu args
   # AABB for all buttons
-  aabb_first_button = AABB(args.inputs.mouse.x - 20, args.inputs.mouse.y.from_top, 1, 1, 480, 460.from_top, 100, 40)
-  aabb_second_button = AABB(args.inputs.mouse.x - 20, args.inputs.mouse.y.from_top, 1, 1, 770, 460.from_top, 100, 40)
-  aabb_third_button = AABB(args.inputs.mouse.x - 20, args.inputs.mouse.y.from_top, 1, 1, 511, 365.from_top, 60, 60)
-  aabb_fourth_button = AABB(args.inputs.mouse.x - 20, args.inputs.mouse.y.from_top, 1, 1, 690, 365.from_top, 60, 60)
-  aabb_fifth_button = AABB(args.inputs.mouse.x - 20, args.inputs.mouse.y.from_top, 1, 1, 528, 283.from_top, 100, 40)
-  aabb_sixth_button = AABB(args.inputs.mouse.x - 20, args.inputs.mouse.y.from_top, 1, 1, 528, 213.from_top, 100, 40)
-  aabb_seventh_button = AABB(args.inputs.mouse.x - 20, args.inputs.mouse.y.from_top, 1, 1, 324, 143.from_top, 580, 40)
+  if !is_mobile
+    aabb_first_button = AABB(args.inputs.mouse.x - 20, args.inputs.mouse.y.from_top, 1, 1, 480, 460.from_top, 100, 40)
+    aabb_second_button = AABB(args.inputs.mouse.x - 20, args.inputs.mouse.y.from_top, 1, 1, 770, 460.from_top, 100, 40)
+    aabb_third_button = AABB(args.inputs.mouse.x - 20, args.inputs.mouse.y.from_top, 1, 1, 511, 365.from_top, 60, 60)
+    aabb_fourth_button = AABB(args.inputs.mouse.x - 20, args.inputs.mouse.y.from_top, 1, 1, 690, 365.from_top, 60, 60)
+    aabb_fifth_button = AABB(args.inputs.mouse.x - 20, args.inputs.mouse.y.from_top, 1, 1, 528, 283.from_top, 100, 40)
+    aabb_sixth_button = AABB(args.inputs.mouse.x - 20, args.inputs.mouse.y.from_top, 1, 1, 528, 213.from_top, 100, 40)
+    aabb_seventh_button = AABB(args.inputs.mouse.x - 20, args.inputs.mouse.y.from_top, 1, 1, 324, 143.from_top, 580, 40)
+    aabb_back_button = AABB(args.inputs.mouse.x - 20, (args.inputs.mouse.y + 595).from_top, 1, 1, 16, 660.from_top, 32, 100)
+  else
+    if !args.inputs.finger_one.nil?
+      aabb_first_button = AABB(args.inputs.finger_one.x - 20, args.inputs.finger_one.y.from_top, 1, 1, 480, 460.from_top, 100, 40)
+      aabb_second_button = AABB(args.inputs.finger_one.x - 20, args.inputs.finger_one.y.from_top, 1, 1, 770, 460.from_top, 100, 40)
+      aabb_third_button = AABB(args.inputs.finger_one.x - 20, args.inputs.finger_one.y.from_top, 1, 1, 511, 365.from_top, 60, 60)
+      aabb_fourth_button = AABB(args.inputs.finger_one.x - 20, args.inputs.finger_one.y.from_top, 1, 1, 690, 365.from_top, 60, 60)
+      aabb_fifth_button = AABB(args.inputs.finger_one.x - 20, args.inputs.finger_one.y.from_top, 1, 1, 528, 283.from_top, 100, 40)
+      aabb_sixth_button = AABB(args.inputs.finger_one.x - 20, args.inputs.finger_one.y.from_top, 1, 1, 528, 213.from_top, 100, 40)
+      aabb_seventh_button = AABB(args.inputs.finger_one.x - 20, args.inputs.finger_one.y.from_top, 1, 1, 324, 143.from_top, 580, 40)
+      aabb_back_button = AABB(args.inputs.finger_one.x - 20, (args.inputs.finger_one.y + 595).from_top, 1, 1, 16, 660.from_top, 32, 100)
+    end
+  end
   
   # Draw background and menu label
   args.outputs.primitives << {
@@ -441,17 +491,6 @@ def options_menu args
     b: aabb_first_button ? 255 : 200,
     a: 255
   }.label
-  
-  #args.outputs.primitives << {
-  #  x: 500,
-  #  y: 300.from_top,
-  #  w: 100,
-  #  h: 40,
-  #  r: 255,
-  #  g: 0,
-  #  b: 255,
-  #  a: 255
-  #}.border
   
   args.outputs.primitives << {
     x: 500,
@@ -627,40 +666,42 @@ def options_menu args
   }.border
   
   # Fullscreen button
-  args.outputs.primitives << {
-    x: 360,
-    y: 200,
-    text: "FULLSCREEN:",
-    font: "fonts/ubuntu-title.ttf",
-    size_enum: 10,
-    r: 255,
-    g: 0,
-    b: 200,
-    a: 255
-  }.label
+  if !is_mobile
+    args.outputs.primitives << {
+      x: 360,
+      y: 200,
+      text: "FULLSCREEN:",
+      font: "fonts/ubuntu-title.ttf",
+      size_enum: 10,
+      r: 255,
+      g: 0,
+      b: 200,
+      a: 255
+    }.label
   
-  args.outputs.primitives << {
-    x: args.state.fullscreen == 1 ? 580 : 575,
-    y: args.state.fullscreen == 1 ? 205 : 200,
-    text: args.state.fullscreen == 1 ? "ON" : "OFF",
-    font: "fonts/ubuntu-title.ttf",
-    size_enum: 10,
-    r: 255,
-    g: 0,
-    b: aabb_sixth_button ? 255 : 200,
-    a: 255
-  }.label
+    args.outputs.primitives << {
+      x: args.state.fullscreen == 1 ? 580 : 575,
+      y: args.state.fullscreen == 1 ? 205 : 200,
+      text: args.state.fullscreen == 1 ? "ON" : "OFF",
+      font: "fonts/ubuntu-title.ttf",
+      size_enum: 10,
+      r: 255,
+      g: 0,
+      b: aabb_sixth_button ? 255 : 200,
+      a: 255
+    }.label
   
-  args.outputs.primitives << {
-    x: 550,
-    y: 160,
-    w: 100,
-    h: 40,
-    r: 255,
-    g: 0,
-    b: aabb_sixth_button ? 255 : 200,
-    a: 255,
-  }.border
+    args.outputs.primitives << {
+      x: 550,
+      y: 160,
+      w: 100,
+      h: 40,
+      r: 255,
+      g: 0,
+      b: aabb_sixth_button ? 255 : 200,
+      a: 255,
+    }.border
+  end
   
   # Clear data button :(
   args.outputs.primitives << {
@@ -695,16 +736,14 @@ def options_menu args
     size_enum: 10,
     r: 255,
     g: 0,
-    b: AABB(args.inputs.mouse.x - 20, (args.inputs.mouse.y + 595).from_top, 1, 1, 16, 660.from_top, 32, 100) ? 255 : 180,
+    b: aabb_back_button ? 255 : 180,
     a: 255
   }.label
   
-  #$gtk.log "X: #{args.inputs.mouse.x}, Y: #{args.inputs.mouse.y}"
-  
   # If clicked on button, Do his work.
   # NOTE: Game options automatically saved once level finished or player gets out of options menu! :)
-  if args.inputs.mouse.click && args.inputs.mouse.button_left
-    if AABB(args.inputs.mouse.x - 20, (args.inputs.mouse.y + 595).from_top, 1, 1, 16, 660.from_top, 32, 100)
+  if (args.inputs.mouse.click && args.inputs.mouse.button_left) || touch_press(args)
+    if aabb_back_button
       play_click_sound args
       args.state.current_scene = 0
       args.state.clear_data_timer = 0
@@ -729,9 +768,9 @@ def options_menu args
     elsif aabb_fifth_button
       play_click_sound args
       args.state.luck_mode = args.state.luck_mode == 1 ? 0 : 1
-    elsif aabb_sixth_button
+    elsif aabb_sixth_button && !is_mobile
       play_click_sound args
-      args.state.fullscreen = args.state.fullscreen == 1 ? 0 : 1
+      args.state.fullscreen = (args.state.fullscreen == 1) ? 0 : 1
     elsif aabb_seventh_button
       play_click_sound args
       args.state.current_grid = [
@@ -795,7 +834,15 @@ end
 
 # Credits scene
 def credits_menu args
-  args.state.hover_on_link = AABB(args.inputs.mouse.x - 20, (args.inputs.mouse.y + 40).from_top, 1, 1, 376, 382.from_top, 500, 48)
+  if !is_mobile
+    hover_on_link = AABB(args.inputs.mouse.x - 20, (args.inputs.mouse.y + 40).from_top, 1, 1, 376, 382.from_top, 500, 48)
+    aabb_back_button = AABB(args.inputs.mouse.x - 20, (args.inputs.mouse.y + 595).from_top, 1, 1, 16, 660.from_top, 32, 100)
+  else
+    if !args.inputs.finger_one.nil?
+      hover_on_link = AABB(args.inputs.finger_one.x - 20, (args.inputs.finger_one.y + 40).from_top, 1, 1, 376, 382.from_top, 500, 48)
+      aabb_back_button = AABB(args.inputs.finger_one.x - 20, (args.inputs.finger_one.y + 595).from_top, 1, 1, 16, 660.from_top, 32, 100)
+    end
+  end
   
   # Draw background and logo
   args.outputs.primitives << {
@@ -850,7 +897,7 @@ def credits_menu args
     size_enum: 8,
     r: 255,
     g: 0,
-    b: args.state.hover_on_link ? 255 : 180,
+    b: hover_on_link ? 255 : 180,
     a: 255
   }.label
   
@@ -865,7 +912,7 @@ def credits_menu args
     b: 200,
     a: 255
   }.label
-  
+=begin  
   args.outputs.primitives << {
     x: 16,
     y: 660.from_top,
@@ -877,7 +924,7 @@ def credits_menu args
     b: 200,
     a: 255
   }.label
-  
+=end  
   # Draw back button
   args.outputs.primitives << {
     x: 16,
@@ -887,17 +934,17 @@ def credits_menu args
     size_enum: 10,
     r: 255,
     g: 0,
-    b: AABB(args.inputs.mouse.x - 20, (args.inputs.mouse.y + 595).from_top, 1, 1, 16, 660.from_top, 32, 100) ? 255 : 180,
+    b: aabb_back_button ? 255 : 180,
     a: 255
   }.label
   
   # If clicked on link, Go for it!
   # Else if back button clicked, Get back to main menu.
-  if args.inputs.mouse.click && args.inputs.mouse.button_left
-    if AABB(args.inputs.mouse.x - 20, (args.inputs.mouse.y + 595).from_top, 1, 1, 16, 660.from_top, 32, 100)
+  if (args.inputs.mouse.click && args.inputs.mouse.button_left) || touch_press(args)
+    if aabb_back_button
       play_click_sound args
       args.state.current_scene = 0
-    elsif args.state.hover_on_link
+    elsif hover_on_link
       play_click_sound args
       $gtk.openurl "https://itch.io/jam/juicy-jam-1"
     end
@@ -907,8 +954,17 @@ end
 # Select mode menu, Only appear if starting new game.
 # NOTE: I can assume that player may select some sort of mode by mistake, For that in options i allowed ya to change mode.
 def select_mode_menu args
-  aabb_first_mode = AABB(args.inputs.mouse.x - 20, args.inputs.mouse.y.from_top, 1, 1, 320, 522.from_top, 610, 160)
-  aabb_second_mode = AABB(args.inputs.mouse.x - 20, args.inputs.mouse.y.from_top, 1, 1, 320, 280.from_top, 610, 160)
+  if !is_mobile
+    aabb_first_mode = AABB(args.inputs.mouse.x - 20, args.inputs.mouse.y.from_top, 1, 1, 320, 522.from_top, 610, 160)
+    aabb_second_mode = AABB(args.inputs.mouse.x - 20, args.inputs.mouse.y.from_top, 1, 1, 320, 280.from_top, 610, 160)
+    aabb_back_button = AABB(args.inputs.mouse.x - 20, (args.inputs.mouse.y + 595).from_top, 1, 1, 16, 660.from_top, 32, 100)
+  else
+    if !args.inputs.finger_one.nil?
+      aabb_first_mode = AABB(args.inputs.finger_one.x - 20, args.inputs.finger_one.y.from_top, 1, 1, 320, 522.from_top, 610, 160)
+      aabb_second_mode = AABB(args.inputs.finger_one.x - 20, args.inputs.finger_one.y.from_top, 1, 1, 320, 280.from_top, 610, 160)
+      aabb_back_button = AABB(args.inputs.finger_one.x - 20, (args.inputs.finger_one.y + 595).from_top, 1, 1, 16, 660.from_top, 32, 100)
+    end
+  end
   
   # Draw background and menu label
   args.outputs.primitives << {
@@ -1011,18 +1067,14 @@ def select_mode_menu args
     size_enum: 10,
     r: 255,
     g: 0,
-    b: AABB(args.inputs.mouse.x - 20, (args.inputs.mouse.y + 595).from_top, 1, 1, 16, 660.from_top, 32, 100) ? 255 : 180,
+    b: aabb_back_button ? 255 : 180,
     a: 255
   }.label
   
-  #$gtk.log "X: #{args.inputs.mouse.x}, Y: #{args.inputs.mouse.y}"
-  # x: 384, y: 522
-  # x: 350, y: 280
-  
   # If selected mode go to gameplay!
   # And let the fun begin! :)
-  if args.inputs.mouse.click && args.inputs.mouse.button_left
-    if AABB(args.inputs.mouse.x - 20, (args.inputs.mouse.y + 595).from_top, 1, 1, 16, 660.from_top, 32, 100)
+  if (args.inputs.mouse.click && args.inputs.mouse.button_left) || touch_press(args)
+    if aabb_back_button
       play_click_sound args
       args.state.current_scene = 0
     elsif aabb_first_mode
@@ -1040,9 +1092,17 @@ end
 # Pause menu scene!
 def pause_menu args
   # AABB for menu options
-  aabb_first_text = AABB(args.inputs.mouse.x, args.inputs.mouse.y.from_top, 1, 1, 520, 330, 200, 100)
-  aabb_second_text = AABB(args.inputs.mouse.x, args.inputs.mouse.y.from_top, 1, 1, 500, 440, 200, 100)
-  aabb_third_text = AABB(args.inputs.mouse.x, args.inputs.mouse.y.from_top, 1, 1, 586, 550, 200, 100)
+  if !is_mobile
+    aabb_first_text = AABB(args.inputs.mouse.x, args.inputs.mouse.y.from_top, 1, 1, 520, 330, 200, 100)
+    aabb_second_text = AABB(args.inputs.mouse.x, args.inputs.mouse.y.from_top, 1, 1, 500, 440, 200, 100)
+    aabb_third_text = AABB(args.inputs.mouse.x, args.inputs.mouse.y.from_top, 1, 1, 586, 550, 200, 100)
+  else
+    if !args.inputs.finger_one.nil?
+      aabb_first_text = AABB(args.inputs.finger_one.x, args.inputs.finger_one.y.from_top, 1, 1, 520, 330, 200, 100)
+      aabb_second_text = AABB(args.inputs.finger_one.x, args.inputs.finger_one.y.from_top, 1, 1, 500, 440, 200, 100)
+      aabb_third_text = AABB(args.inputs.finger_one.x, args.inputs.finger_one.y.from_top, 1, 1, 586, 550, 200, 100)
+    end
+  end
   
   # Draw background and menu label
   args.outputs.primitives << {
@@ -1103,7 +1163,7 @@ def pause_menu args
   }.label
   
   # If selected an option, Go for it!
-  if args.inputs.mouse.click && args.inputs.mouse.button_left
+  if (args.inputs.mouse.click && args.inputs.mouse.button_left) || touch_press(args)
     if aabb_first_text
       play_click_sound args
       args.state.current_scene = 2
@@ -1127,7 +1187,13 @@ end
 
 # Function that renders game graphics!
 def render_game args
-  aabb_pause_button = AABB(args.inputs.mouse.x, args.inputs.mouse.y, 1, 1, 1220, 64.from_top, 32, 64)
+  if !is_mobile
+    aabb_pause_button = AABB(args.inputs.mouse.x, args.inputs.mouse.y, 1, 1, 1220, 64.from_top, 32, 64)
+  else
+    if !args.inputs.finger_one.nil?
+      aabb_pause_button = AABB(args.inputs.finger_one.x, args.inputs.finger_one.y, 1, 1, 1220, 64.from_top, 32, 64)
+    end
+  end
   
   # Draw background and level label
   args.outputs.primitives << {
@@ -1150,25 +1216,6 @@ def render_game args
     a: 255
   }.label
   
-#DEBUG
-# This to draw level finished! (To see if something is going wrong)
-=begin
-  args.state.levels[args.state.current_level][:content].length.times do |i|
-    args.state.levels[args.state.current_level][:content][i].length.times do |j|
-      args.outputs.primitives << {
-        x: 416 + (j * 32) + 96,
-        y: (264 + (i * 32)).from_top,
-        w: 32,
-        h: 32,
-        r: args.state.levels[args.state.current_level][:palette][args.state.levels[args.state.current_level][:content][i][j]].r,
-        g: args.state.levels[args.state.current_level][:palette][args.state.levels[args.state.current_level][:content][i][j]].g,
-        b: args.state.levels[args.state.current_level][:palette][args.state.levels[args.state.current_level][:content][i][j]].b,
-        a: args.state.levels[args.state.current_level][:palette][args.state.levels[args.state.current_level][:content][i][j]].a,
-      }.solid
-    end
-  end
-=end
-
   # If pixel is empty, Draw rectangle in white with corresponding color
   # Else, Draw pixel with it's color!
   args.state.current_grid.length.times.map do |i|
@@ -1272,7 +1319,13 @@ def game_input args
   # DEV NOTE: All button clicks plays sound!
   
   # AABB for pause button
-  aabb_pause_button = AABB(args.inputs.mouse.x, args.inputs.mouse.y, 1, 1, 1220, 64.from_top, 32, 64)
+  if !is_mobile
+    aabb_pause_button = AABB(args.inputs.mouse.x, args.inputs.mouse.y, 1, 1, 1220, 64.from_top, 32, 64)
+  else
+    if !args.inputs.finger_one.nil?
+      aabb_pause_button = AABB(args.inputs.finger_one.x, args.inputs.finger_one.y, 1, 1, 1220, 64.from_top, 32, 64)
+    end
+  end
   
   # If number key pressed, Change selected color to key number!
   # Trick: To not use color, Hit key 0
@@ -1286,9 +1339,17 @@ def game_input args
   end
   
   # If clicked on one of palette colors, Select color
-  if args.inputs.mouse.button_left & args.inputs.mouse.click
+  if (args.inputs.mouse.button_left && args.inputs.mouse.click) || touch_press(args)
     args.state.levels[args.state.current_level][:palette].length.times.map do |i|
-      if AABB(args.inputs.mouse.x, args.inputs.mouse.y.from_top, 1, 1, (-64 + i * 64), 64.from_top, 64, 64)
+      if !is_mobile
+        color_rec = AABB(args.inputs.mouse.x, args.inputs.mouse.y.from_top, 1, 1, (-64 + i * 64), 64.from_top, 64, 64)
+      else
+        if !args.inputs.finger_one.nil?
+          color_rec = AABB(args.inputs.finger_one.x, args.inputs.finger_one.y.from_top, 1, 1, (-64 + i * 64), 64.from_top, 64, 64)
+        end
+      end
+      
+      if color_rec
         play_click_sound args
         args.state.selected_color = i
       end
@@ -1296,7 +1357,7 @@ def game_input args
   end
   
   # If clicked on pause button go for it!
-  if args.inputs.mouse.click && args.inputs.mouse.button_left
+  if (args.inputs.mouse.click && args.inputs.mouse.button_left) || touch_press(args)
     if aabb_pause_button
       play_click_sound args
       args.state.current_scene = 3
@@ -1304,11 +1365,18 @@ def game_input args
   end
   
   # If clicked on pixel that is not painted, Paint with popping sound!
-  if args.inputs.mouse.button_left
+  if args.inputs.mouse.button_left || touch_down(args)
     args.state.current_grid.length.times.map do |i|
       args.state.current_grid[i].length.times.map do |j|
-        if AABB(args.inputs.mouse.x, args.inputs.mouse.y, 1, 1, 416 + (j * 32) + 96, (264 + (i * 32)).from_top, 32, 32)
-          
+        if !is_mobile
+          grid_rec_aabb = AABB(args.inputs.mouse.x, args.inputs.mouse.y, 1, 1, 416 + (j * 32) + 96, (264 + (i * 32)).from_top, 32, 32)
+        else
+          if !args.inputs.finger_one.nil?
+            grid_rec_aabb = AABB(args.inputs.finger_one.x, args.inputs.finger_one.y, 1, 1, 416 + (j * 32) + 96, (264 + (i * 32)).from_top, 32, 32)
+          end
+        end
+        
+        if grid_rec_aabb
           if args.state.sound_enabled == 1
             if args.state.pops == 0
               args.state.pops = 1

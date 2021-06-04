@@ -2,5 +2,5 @@ devid=Rabios
 devtitle=Rabia Alhaffar
 gameid=luckpaint
 gametitle=luckpaint
-version=0.3
+version=0.4
 icon=metadata/icon.png
