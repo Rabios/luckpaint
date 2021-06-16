@@ -34,8 +34,8 @@ A: Easy, Go to https://github.com/Rabios/luckpaint/issues and create new issue d
 LUCKPAINT - GAME CONTROLS
 ================================================================
 
-1. Paint with mouse click on pixels.
-2. For changing selected color from palette: Click with mouse on color rectangle or hit key with same number on the color rectangle (Hit 1 to Select color 1).
+1. Paint with mouse click/tap on pixels.
+2. For changing selected color from palette: Tap/Click with mouse on color rectangle or hit key with same number on the color rectangle (Hit 1 to Select color 1).
 3. S to Take screenshot.
 4. R to Restart game. (Can be needy in some cases)
 5. Escape to exit/pause game.
